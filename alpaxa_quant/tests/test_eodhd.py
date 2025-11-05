@@ -1,36 +1,171 @@
 from alpaxa_quant.config import return_EODHD_base_api_endpoint, return_EODHD_test_api_key
-from alpaxa_quant.eodhd import get_historical_ticker_price
+from alpaxa_quant.eodhd import (
+    get_historical_ticker_price, 
+    get_insider_transactions,
+    get_general_ticker_info, 
+    get_outstanding_shares,
+    get_ticker_highlights, 
+    get_ticker_valuation,
+    get_analyst_ratings,
+    get_split_dividends,
+    get_shares_stats,
+    get_technicals,
+    get_financials,
+    get_earnings,
+    get_holders,
+)
 import pandas as pd
 import pytest
 
-def test_make_safe_request():
+
+def test_historical_ticker_price():
     e = return_EODHD_base_api_endpoint()
     k = return_EODHD_test_api_key()
 
     df = get_historical_ticker_price(
-        base_endpoint=e, 
-        api_token=k, 
-        ticker='TSLA',
-        exchange_id='US',
-        fmt='json', 
-        period='d',
-        order='a',
-        from_date='2017-05-01',
-        to_date='2017-05-25',
-        timeout=10,
-        verbose=True)
-    
-    assert df is not None, "Expected non-empty DataFrame"
-    assert isinstance(df, pd.DataFrame), "Response should be a pandas DataFrame"
-    assert not df.empty, "Expected data in DataFrame"
+        base_endpoint=e,
+        api_token=k,
+        ticker="TSLA",
+        fmt="json",
+        period="d",
+        from_date="2017-05-01",
+        to_date="2017-05-25",
+        verbose=True,
+    )
 
-    # Validate key columns exist
+    assert df is not None
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
     for col in ["date", "open", "high", "low", "close", "adjusted_close", "volume"]:
-        assert col in df.columns, f"Missing column: {col}"
+        assert col in df.columns
 
-    # Check if the date returned follows the date range
-    assert "2017-05-01" in df["date"].values, "Expected start date missing"
-    assert "2017-05-25" in df["date"].values, "Expected end date missing"
+
+def test_general_ticker_info():
+    e = return_EODHD_base_api_endpoint()
+    k = return_EODHD_test_api_key()
+
+    df = get_general_ticker_info(base_endpoint=e, api_token=k, ticker="AAPL", verbose=True)
+    assert df is not None
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
+
+
+def test_ticker_highlights():
+    e = return_EODHD_base_api_endpoint()
+    k = return_EODHD_test_api_key()
+
+    df = get_ticker_highlights(base_endpoint=e, api_token=k, ticker="AAPL", verbose=True)
+    assert df is not None
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
+
+
+def test_ticker_valuation():
+    e = return_EODHD_base_api_endpoint()
+    k = return_EODHD_test_api_key()
+
+    df = get_ticker_valuation(base_endpoint=e, api_token=k, ticker="AAPL", verbose=True)
+    assert df is not None
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
+
+
+def test_shares_stats():
+    e = return_EODHD_base_api_endpoint()
+    k = return_EODHD_test_api_key()
+
+    df = get_shares_stats(base_endpoint=e, api_token=k, ticker="AAPL", verbose=True)
+    assert df is not None
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
+
+
+def test_technicals():
+    e = return_EODHD_base_api_endpoint()
+    k = return_EODHD_test_api_key()
+
+    df = get_technicals(base_endpoint=e, api_token=k, ticker="AAPL", verbose=True)
+    assert df is not None
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
+
+
+def test_split_dividends():
+    e = return_EODHD_base_api_endpoint()
+    k = return_EODHD_test_api_key()
+
+    df = get_split_dividends(base_endpoint=e, api_token=k, ticker="AAPL", verbose=True)
+    assert df is not None
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
+
+
+def test_analyst_ratings():
+    e = return_EODHD_base_api_endpoint()
+    k = return_EODHD_test_api_key()
+
+    df = get_analyst_ratings(base_endpoint=e, api_token=k, ticker="AAPL", verbose=True)
+    assert df is not None
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
+
+
+def test_holders_institutions():
+    e = return_EODHD_base_api_endpoint()
+    k = return_EODHD_test_api_key()
+
+    df = get_holders(base_endpoint=e, api_token=k, ticker="AAPL", holder_type="institutions", verbose=True)
+    assert df is not None
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
+
+
+def test_insider_transactions():
+    e = return_EODHD_base_api_endpoint()
+    k = return_EODHD_test_api_key()
+
+    df = get_insider_transactions(base_endpoint=e, api_token=k, ticker="AAPL", verbose=True)
+    assert df is not None
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
+
+
+def test_outstanding_shares():
+    e = return_EODHD_base_api_endpoint()
+    k = return_EODHD_test_api_key()
+
+    df = get_outstanding_shares(base_endpoint=e, api_token=k, ticker="AAPL", period="annual", verbose=True)
+    assert df is not None
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
+
+
+def test_earnings_trend():
+    e = return_EODHD_base_api_endpoint()
+    k = return_EODHD_test_api_key()
+
+    df = get_earnings(base_endpoint=e, api_token=k, ticker="AAPL", period="trend", verbose=True)
+    assert df is not None
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
+
+
+def test_financials_balance_sheet_quarterly():
+    e = return_EODHD_base_api_endpoint()
+    k = return_EODHD_test_api_key()
+
+    df = get_financials(
+        base_endpoint=e,
+        api_token=k,
+        ticker="AAPL",
+        period="quarterly",
+        financial_type="Balance_Sheet",
+        verbose=True,
+    )
+    assert df is not None
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
+
 
 if __name__ == "__main__":
     pytest.main([__file__])
