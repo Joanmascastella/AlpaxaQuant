@@ -10,7 +10,8 @@ def test_make_safe_request():
     df = get_historical_ticker_price(
         base_endpoint=e, 
         api_token=k, 
-        ticker='TSLA', 
+        ticker='TSLA',
+        exchange_id='US',
         fmt='json', 
         period='d',
         order='a',
