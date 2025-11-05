@@ -10,4 +10,4 @@ def test_dotenv_variables():
     assert return_EODHD_test_api_key()      == os.getenv("TEST_EODHD_API_KEY")
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.main([__file__])

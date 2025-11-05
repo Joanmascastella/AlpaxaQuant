@@ -1,5 +1,6 @@
 from alpaxa_quant.config import return_EODHD_base_api_endpoint, return_EODHD_test_api_key
 from alpaxa_quant.utils import make_safe_request
+import pandas as pd
 import pytest
 
 def test_make_safe_request():
@@ -7,8 +8,21 @@ def test_make_safe_request():
     k = return_EODHD_test_api_key()
 
     # Construct test endpoint
-    endpoint = f"{e}/MCD.US?api_token={e}&period=d&from=2017-01-05&to=2017-01-10&fmt=json"
-    print(endpoint)
+    endpoint = f"{e}/MCD.US?api_token={k}&period=d&from=2017-01-05&to=2017-01-10&fmt=json"
+    # Testing make request
+    df = make_safe_request(endpoint=endpoint, timeout=10, debug=True)
+    
+    assert df is not None, "Expected non-empty DataFrame"
+    assert isinstance(df, pd.DataFrame), "Response should be a pandas DataFrame"
+    assert not df.empty, "Expected data in DataFrame"
+
+    # Validate key columns exist
+    for col in ["date", "open", "high", "low", "close", "adjusted_close", "volume"]:
+        assert col in df.columns, f"Missing column: {col}"
+
+    # Check if the date returned follows the date range
+    assert "2017-01-05" in df["date"].values, "Expected start date missing"
+    assert "2017-01-10" in df["date"].values, "Expected end date missing"
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.main([__file__])
