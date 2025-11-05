@@ -1,6 +1,8 @@
 from alpaxa_quant.utils import make_safe_request
+from datetime import datetime, timedelta
 from typing import Literal
 import pandas as pd
+import requests
 
 def get_historical_ticker_price(
             base_endpoint: str,
@@ -1321,3 +1323,98 @@ def get_financials(
             return None
 
         return df
+
+def fetch_news_sentiment(
+    base_endpoint: str,
+    api_token: str,
+    ticker: str,
+    start_date: str = "2000-01-01",
+    end_date: datetime = None,
+    chunk: str = Literal['year', 'month', 'quarter'],
+    verbose: bool = True
+) -> pd.DataFrame:
+    """
+    Fetches all news for a given ticker from EODHD API in date chunks.
+    Automatically iterates from start_date to today.
+
+    Args:
+        base_endpoint (str): Base API endpoint (e.g. 'https://eodhd.com/api').
+        api_token (str): EODHD API key.
+        ticker (str): Stock ticker (e.g. 'MSFT.US').
+        start_date (str): Starting date (YYYY-MM-DD).
+        end_date (datetime): End date (defaults to today).
+        chunk (str): Chunk type ('year', 'month', 'quarter').
+        verbose (bool): Print progress.
+
+    Returns:
+        pd.DataFrame: Combined news articles across all chunks.
+    """
+    base_url = f"{base_endpoint}/news"
+    start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+    if end_date is None:
+        end_dt = datetime.today()
+    elif isinstance(end_date, str):
+        end_dt = datetime.strptime(end_date, "%Y-%m-%d")
+    else:
+        end_dt = end_date
+
+    # define chunk step
+    if chunk == "year":
+        step = timedelta(days=365)
+    elif chunk == "quarter":
+        step = timedelta(days=90)
+    elif chunk == "month":
+        step = timedelta(days=30)
+    else:
+        raise ValueError("Invalid chunk type. Use 'year', 'quarter', or 'month'.")
+
+    all_data = []
+
+    current = start_dt
+    while current < end_dt:
+        next_chunk = min(current + step, end_dt)
+        params = {
+            "s": ticker,
+            "from": current.strftime("%Y-%m-%d"),
+            "to": next_chunk.strftime("%Y-%m-%d"),
+            "api_token": api_token,
+            "fmt": "json"
+        }
+
+        if verbose:
+            print(f"Fetching {params['from']} → {params['to']}")
+
+        try:
+            response = requests.get(base_url, params=params, timeout=15)
+            response.raise_for_status()
+            data = response.json()
+
+            for item in data:
+                if isinstance(item, dict):
+                    sentiment = item.get("sentiment", {})
+                    filtered_item = {
+                        "date": item.get("date"),
+                        "symbols": ",".join(item.get("symbols", [])),
+                        "tags": ",".join(item.get("tags", [])),
+                        "polarity": sentiment.get("polarity"),
+                        "neg": sentiment.get("neg"),
+                        "neu": sentiment.get("neu"),
+                        "pos": sentiment.get("pos"),
+                    }
+                    all_data.append(filtered_item)
+
+        except Exception as e:
+            print(f"Error fetching {params['from']} → {params['to']}: {e}")
+
+        current = next_chunk + timedelta(days=1)
+
+    if not all_data:
+        print("No data retrieved.")
+        return pd.DataFrame()
+
+    df = pd.DataFrame(all_data)
+    df.drop_duplicates(subset=["date", "symbols", "tags"], inplace=True)
+    df.sort_values(by="date", inplace=True)
+    df.reset_index(drop=True, inplace=True)
+
+    return df
