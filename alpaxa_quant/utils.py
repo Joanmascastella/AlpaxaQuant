@@ -1,7 +1,8 @@
-import requests
+from typing import Dict, Any
 import pandas as pd
+import requests
 
-def make_safe_request(endpoint: str, timeout: int, debug:bool) -> pd.DataFrame:
+def make_safe_request(endpoint: str, timeout: int, params: Dict[str,Any] ,verbose: bool) -> pd.DataFrame:
     """
         Performs a HTTP GET request to a given endpoint and returns the
         response content as a pandas DataFrame.
@@ -9,6 +10,7 @@ def make_safe_request(endpoint: str, timeout: int, debug:bool) -> pd.DataFrame:
         Args:
             endpoint (str): The full URL to send the GET request to.
             timeout (int): The maximum number of seconds to wait for a response.
+            params (dict): The dictionary containing all the necessery date to make a request.
             debug (bool): If True, prints debug information during the request
                 (e.g., URL, status code, and DataFrame preview).
 
@@ -28,14 +30,14 @@ def make_safe_request(endpoint: str, timeout: int, debug:bool) -> pd.DataFrame:
             ...     print(df.head())
         """
     try:
-        if debug:
+        if verbose:
             print(f"Making request to {endpoint} with timeout {timeout}")
 
         # Check what http method will be used to make the request
-        response = requests.get(endpoint, timeout=timeout)
+        response = requests.get(endpoint, params=params, timeout=timeout)
         response.raise_for_status()
         
-        if debug:
+        if verbose:
             print(f"Made request. Got status {response.status_code}")
 
         # Parse JSON
@@ -43,7 +45,7 @@ def make_safe_request(endpoint: str, timeout: int, debug:bool) -> pd.DataFrame:
         # Convert to DataFrame
         df = pd.DataFrame(data)
         
-        if debug:
+        if verbose:
             print(f"Data retrieved {df.head(5)}")
 
         return df 
