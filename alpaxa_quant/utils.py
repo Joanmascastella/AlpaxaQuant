@@ -1,8 +1,40 @@
 from typing import Dict, Any
 import pandas as pd
 import requests
+from io import StringIO
 
-def make_safe_request(endpoint: str, timeout: int, params: Dict[str,Any] ,verbose: bool) -> pd.DataFrame:
+def _normalize_to_df(payload: Any) -> pd.DataFrame | None:
+    """
+    Convert common JSON shapes from EODHD into a pandas DataFrame.
+    Handles:
+      - list[dict]                       -> DataFrame(list)
+      - dict[key -> dict]               -> DataFrame(list(dict.values()))
+      - dict of scalars                 -> DataFrame([dict])
+      - mixed / nested                  -> pd.json_normalize(dict)
+    """
+    if payload is None:
+        return None
+
+    if isinstance(payload, list):
+        return pd.DataFrame(payload)
+
+    # Dict payload
+    if isinstance(payload, dict):
+        vals = list(payload.values())
+        if len(payload) == 0:
+            return pd.DataFrame()
+
+        if all(isinstance(v, dict) for v in vals):
+            return pd.DataFrame.from_records(vals)
+
+        if any(isinstance(v, (dict, list)) for v in vals):
+            return pd.json_normalize(payload, sep=".")
+
+        return pd.DataFrame([payload])
+
+    return pd.DataFrame([{"value": payload}])
+
+def make_safe_request(endpoint: str, timeout: int, params: Dict[str,Any] ,verbose: bool) -> pd.DataFrame | None:
     """
         Performs a HTTP GET request to a given endpoint and returns the
         response content as a pandas DataFrame.
@@ -43,7 +75,7 @@ def make_safe_request(endpoint: str, timeout: int, params: Dict[str,Any] ,verbos
         # Parse JSON
         data = response.json()
         # Convert to DataFrame
-        df = pd.DataFrame(data)
+        df = _normalize_to_df(data)
         
         if verbose:
             print(f"Data retrieved {df.head(5)}")

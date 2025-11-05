@@ -14,7 +14,7 @@ def get_historical_ticker_price(
             to_date: str = None,
             timeout: int = 10,
             verbose: bool = True
-        ) -> pd.DataFrame:
+        ) -> pd.DataFrame | None:
         """
         Fetch historical EODHD price data for a given ticker symbol.
 
@@ -52,7 +52,7 @@ def get_historical_ticker_price(
             params["to"] = to_date
         
         # Set up endpoint 
-        constructed_endpoint=f"{base_endpoint}/{ticker.upper()}.{exchange_id}"
+        constructed_endpoint=f"{base_endpoint}/eod/{ticker.upper()}.{exchange_id}"
 
         # Verbose print statement
         if verbose:
@@ -88,7 +88,7 @@ def get_general_ticker_info(
         fmt: str = Literal['json', 'csv'],
         order: str = Literal['a', 'd'],
         timeout: int = 10,
-        verbose: bool = True) -> pd.DataFrame:
+        verbose: bool = True) -> pd.DataFrame | None: 
         """
         Fetch comprehensive general company information for a given ticker symbol
         using the EODHD API.
@@ -189,7 +189,7 @@ def get_general_ticker_info(
         }
 
         # Set up endpoint 
-        constructed_endpoint=f"{base_endpoint}/{ticker.upper()}.{exchange_id}"
+        constructed_endpoint=f"{base_endpoint}/fundamentals/{ticker.upper()}.{exchange_id}"
 
         # Verbose print statement
         if verbose:
@@ -223,7 +223,7 @@ def get_ticker_highlights(
         fmt: str = Literal['json', 'csv'],
         order: str = Literal['a', 'd'],
         timeout: int = 10,
-        verbose: bool = True) -> pd.DataFrame:
+        verbose: bool = True) -> pd.DataFrame | None:
         """
         Fetch key financial highlights and valuation metrics for a given ticker symbol
         using the EODHD API with the 'Highlights' filter applied.
@@ -295,7 +295,7 @@ def get_ticker_highlights(
         }
 
         # Set up endpoint 
-        constructed_endpoint=f"{base_endpoint}/{ticker.upper()}.{exchange_id}"
+        constructed_endpoint=f"{base_endpoint}/fundamentals/{ticker.upper()}.{exchange_id}"
 
         # Verbose print statement
         if verbose:
@@ -329,7 +329,7 @@ def get_ticker_valuation(
         fmt: str = Literal['json', 'csv'],
         order: str = Literal['a', 'd'],
         timeout: int = 10,
-        verbose: bool = True) -> pd.DataFrame:
+        verbose: bool = True) -> pd.DataFrame | None:
         """
         Fetch valuation ratios and enterprise value metrics for a given ticker symbol
         using the EODHD API with the 'Valuation' filter applied.
@@ -379,7 +379,7 @@ def get_ticker_valuation(
         }
 
         # Set up endpoint 
-        constructed_endpoint=f"{base_endpoint}/{ticker.upper()}.{exchange_id}"
+        constructed_endpoint=f"{base_endpoint}/fundamentals/{ticker.upper()}.{exchange_id}"
 
         # Verbose print statement
         if verbose:
@@ -413,7 +413,7 @@ def get_shares_stats(
         fmt: str = Literal['json', 'csv'],
         order: str = Literal['a', 'd'],
         timeout: int = 10,
-        verbose: bool = True) -> pd.DataFrame:
+        verbose: bool = True) -> pd.DataFrame | None:
         """
         Fetch share statistics for a given ticker symbol using the EODHD API with the
         'SharesStats' filter applied.
@@ -467,7 +467,7 @@ def get_shares_stats(
         }
 
         # Set up endpoint 
-        constructed_endpoint=f"{base_endpoint}/{ticker.upper()}.{exchange_id}"
+        constructed_endpoint=f"{base_endpoint}/fundamentals/{ticker.upper()}.{exchange_id}"
 
         # Verbose print statement
         if verbose:
@@ -501,7 +501,7 @@ def get_technicals(
         fmt: str = Literal['json', 'csv'],
         order: str = Literal['a', 'd'],
         timeout: int = 10,
-        verbose: bool = True) -> pd.DataFrame:
+        verbose: bool = True) -> pd.DataFrame | None:
         """
         Fetch technical and trading statistics for a given ticker symbol using the
         EODHD API with the 'Technicals' filter applied.
@@ -554,7 +554,7 @@ def get_technicals(
         }
 
         # Set up endpoint 
-        constructed_endpoint=f"{base_endpoint}/{ticker.upper()}.{exchange_id}"
+        constructed_endpoint=f"{base_endpoint}/fundamentals/{ticker.upper()}.{exchange_id}"
 
         # Verbose print statement
         if verbose:
@@ -588,7 +588,7 @@ def get_split_dividends(
         fmt: str = Literal['json', 'csv'],
         order: str = Literal['a', 'd'],
         timeout: int = 10,
-        verbose: bool = True) -> pd.DataFrame:
+        verbose: bool = True) -> pd.DataFrame | None:
         """
         Fetch dividend and split history information for a given ticker symbol using the
         EODHD API with the 'SplitsDividends' filter applied.
@@ -650,7 +650,7 @@ def get_split_dividends(
         }
 
         # Set up endpoint 
-        constructed_endpoint=f"{base_endpoint}/{ticker.upper()}.{exchange_id}"
+        constructed_endpoint=f"{base_endpoint}/fundamentals/{ticker.upper()}.{exchange_id}"
 
         # Verbose print statement
         if verbose:
@@ -684,7 +684,7 @@ def get_analyst_ratings(
         fmt: str = Literal['json', 'csv'],
         order: str = Literal['a', 'd'],
         timeout: int = 10,
-        verbose: bool = True) -> pd.DataFrame:
+        verbose: bool = True) -> pd.DataFrame | None:
         """
         Fetch analyst consensus ratings and target price data for a given ticker symbol
         using the EODHD API with the 'AnalystRatings' filter applied.
@@ -735,7 +735,7 @@ def get_analyst_ratings(
         }
 
         # Set up endpoint 
-        constructed_endpoint=f"{base_endpoint}/{ticker.upper()}.{exchange_id}"
+        constructed_endpoint=f"{base_endpoint}/fundamentals/{ticker.upper()}.{exchange_id}"
 
         # Verbose print statement
         if verbose:
@@ -770,7 +770,7 @@ def get_holders(
         fmt: str = Literal['json', 'csv'],
         order: str = Literal['a', 'd'],
         timeout: int = 10,
-        verbose: bool = True) -> pd.DataFrame:
+        verbose: bool = True) -> pd.DataFrame | None:
         """
         Fetch institutional or fund holder data for a given ticker symbol using the
         EODHD API with the 'Holders' filter applied.
@@ -860,7 +860,7 @@ def get_holders(
         }
 
         # Set up endpoint 
-        constructed_endpoint=f"{base_endpoint}/{ticker.upper()}.{exchange_id}"
+        constructed_endpoint=f"{base_endpoint}/fundamentals/{ticker.upper()}.{exchange_id}"
 
         # Verbose print statement
         if verbose:
@@ -894,7 +894,7 @@ def get_insider_transactions(
         fmt: str = Literal['json', 'csv'],
         order: str = Literal['a', 'd'],
         timeout: int = 10,
-        verbose: bool = True) -> pd.DataFrame:
+        verbose: bool = True) -> pd.DataFrame | None:
         """
         Fetch insider trading transactions for a given ticker symbol using the EODHD API
         with the 'InsiderTransactions' filter applied.
@@ -978,7 +978,7 @@ def get_insider_transactions(
         }
 
         # Set up endpoint 
-        constructed_endpoint=f"{base_endpoint}/{ticker.upper()}.{exchange_id}"
+        constructed_endpoint=f"{base_endpoint}/fundamentals/{ticker.upper()}.{exchange_id}"
 
         # Verbose print statement
         if verbose:
@@ -1013,7 +1013,7 @@ def get_outstanding_shares(
         fmt: str = Literal['json', 'csv'],
         order: str = Literal['a', 'd'],
         timeout: int = 10,
-        verbose: bool = True) -> pd.DataFrame:
+        verbose: bool = True) -> pd.DataFrame | None:
         """
         Fetch outstanding share count data for a given ticker symbol using the EODHD API
         with the 'outstandingShares' filter applied.
@@ -1069,7 +1069,7 @@ def get_outstanding_shares(
         }
 
         # Set up endpoint 
-        constructed_endpoint=f"{base_endpoint}/{ticker.upper()}.{exchange_id}"
+        constructed_endpoint=f"{base_endpoint}/fundamentals/{ticker.upper()}.{exchange_id}"
 
         # Verbose print statement
         if verbose:
@@ -1104,7 +1104,7 @@ def get_earnings(
         fmt: str = Literal['json', 'csv'],
         order: str = Literal['a', 'd'],
         timeout: int = 10,
-        verbose: bool = True) -> pd.DataFrame:
+        verbose: bool = True) -> pd.DataFrame | None:
         """
         Fetch earnings data for a given ticker symbol using the EODHD API with the
         'Earnings' filter applied.
@@ -1210,7 +1210,7 @@ def get_earnings(
         }
 
         # Set up endpoint 
-        constructed_endpoint=f"{base_endpoint}/{ticker.upper()}.{exchange_id}"
+        constructed_endpoint=f"{base_endpoint}/fundamentals/{ticker.upper()}.{exchange_id}"
 
         # Verbose print statement
         if verbose:
@@ -1246,7 +1246,7 @@ def get_financials(
         fmt: str = Literal['json', 'csv'],
         order: str = Literal['a', 'd'],
         timeout: int = 10,
-        verbose: bool = True) -> pd.DataFrame:
+        verbose: bool = True) -> pd.DataFrame | None:
         """
         Fetch company financial statements for a given ticker symbol using the EODHD API
         with the 'Financials' filter applied.
@@ -1296,7 +1296,7 @@ def get_financials(
         }
 
         # Set up endpoint 
-        constructed_endpoint=f"{base_endpoint}/{ticker.upper()}.{exchange_id}"
+        constructed_endpoint=f"{base_endpoint}/fundamentals/{ticker.upper()}.{exchange_id}"
 
         # Verbose print statement
         if verbose:
