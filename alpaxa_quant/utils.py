@@ -34,7 +34,14 @@ def _normalize_to_df(payload: Any) -> pd.DataFrame | None:
 
     return pd.DataFrame([{"value": payload}])
 
-def make_safe_request(endpoint: str, timeout: int, params: Dict[str,Any] ,verbose: bool) -> pd.DataFrame | None:
+def make_safe_request(   
+    endpoint: str,
+    timeout: int = 30,
+    params: [Dict[str, Any]] = None,
+    json: [Dict[str, Any]] = None,
+    auth: bool = False,
+    jwt_key: str = "",
+    verbose: bool = False) -> pd.DataFrame | None:
     """
         Performs a HTTP GET request to a given endpoint and returns the
         response content as a pandas DataFrame.
@@ -65,10 +72,19 @@ def make_safe_request(endpoint: str, timeout: int, params: Dict[str,Any] ,verbos
         if verbose:
             print(f"Making request to {endpoint} with timeout {timeout}")
 
-        # Check what http method will be used to make the request
-        response = requests.get(endpoint, params=params, timeout=timeout)
-        response.raise_for_status()
-        
+        headers = {"Accept": "application/json"}
+        if auth and jwt_key != "":
+            headers["Authorization"] = f"Bearer {jwt_key}"
+        else:
+            raise ValueError("Please provide a jwt token.")
+
+        if json:
+            response = requests.post(endpoint, headers=headers, json=json, timeout=timeout)
+            response.raise_for_status()
+        else:
+            response = requests.get(endpoint, params=params, headers=headers, json=json, timeout=timeout)
+            response.raise_for_status()
+            
         if verbose:
             print(f"Made request. Got status {response.status_code}")
 
