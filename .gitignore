@@ -1,3 +1,4 @@
 AlpaxaQuant_env
 alpaxa_quant.egg-info
 .env
+.cache
