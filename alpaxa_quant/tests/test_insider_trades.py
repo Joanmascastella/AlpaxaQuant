@@ -1,8 +1,7 @@
 import pytest
 import pandas as pd
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from alpaxa_quant.insider_trades import get_insider_trades, OpenInsiderScraper
-
 
 @pytest.fixture
 def sample_config():
