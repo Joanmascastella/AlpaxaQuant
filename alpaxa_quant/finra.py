@@ -383,11 +383,211 @@ def get_otc_block_summary(
     return final_df
 
 
+def get_daily_short_volume_sale(
+    jwt_token: str,
+    ticker: str,
+    limit: int = 1000,
+    verbose: bool = False
+) -> pd.DataFrame:
+    """
+        Retrieve ALL daily agreggated short volume sale data for a specific ticker symbol
+        using FINRA's pagination system (limit + offset), via make_safe_request.
+
+        Args:
+            jwt_token (str): Bearer token retrieved by get_bearer_token.
+            ticker (str): The ticker symbol to filter for (e.g. 'TSLA').
+            limit (int): The maximum number of records per request (<=1000).
+            verbose (bool): Print debug and progress logs.
+
+        Returns:
+            pd.DataFrame: Combined DataFrame of all available agreggated short volume data records.
+    """
+
+    if verbose:
+        print(f"Retrieving daily short volume sale data for {ticker}...\n")
+
+    if limit > 1000:
+        raise ValueError("Limit must be <= 1000 (FINRA API constraint).")
+
+    url = "https://api.finra.org/data/group/otcMarket/name/regShoDaily"
+    offset = 0
+    all_batches = []
+
+    while True:
+        body = {
+            "limit": limit,
+            "offset": offset,
+            "compareFilters": [
+                {
+                    "compareType": "equal",
+                    "fieldName": "securitiesInformationProcessorSymbolIdentifier",
+                    "fieldValue": ticker.upper()
+                }
+            ],
+            "fields": [
+                "tradeReportDate",
+                "securitiesInformationProcessorSymbolIdentifier",
+                "shortParQuantity",
+                "shortExemptParQuantity",
+                "totalParQuantity",
+                "marketCode",
+                "reportingFacilityCode"
+            ]
+        }
+        
+
+        if verbose:
+            print(f"Fetching offset={offset}, limit={limit} for {ticker}")
+
+        df = make_safe_request(
+            endpoint=url,
+            timeout=30,
+            params=None,
+            json=body,
+            auth=True,
+            jwt_key=jwt_token,
+            verbose=verbose
+        )
+
+        if df is None or df.empty:
+            if verbose:
+                print("No more records found, stopping pagination.")
+            break
+
+        all_batches.append(df)
+        if len(df) < limit:
+            if verbose:
+                print(f"Last batch retrieved ({len(df)} rows).")
+            break
+
+        offset += limit 
+
+    if not all_batches:
+        if verbose:
+            print(f"No data returned for ticker {ticker}.")
+        return pd.DataFrame()
+
+    final_df = pd.concat(all_batches, ignore_index=True)
+
+    if verbose:
+        print(f"Total records retrieved for {ticker}: {len(final_df)}")
+
+    return final_df
+
+
+def get_weekly_summary(
+    jwt_token: str,
+    ticker: str,
+    limit: int = 1000,
+    verbose: bool = False
+) -> pd.DataFrame:
+    """
+    Retrieve FINRA OTC Market Weekly Summary (rolling 12 months)
+    for a specific ticker (issueSymbolIdentifier).
+
+    Args:
+        jwt_token (str): FINRA bearer token.
+        ticker (str): Symbol (e.g., 'AAPL').
+        limit (int): Max records per request.
+        verbose (bool): Print debug output.
+
+    Returns:
+        pd.DataFrame: Weekly OTC/ATS aggregate trade data.
+    """
+
+    if verbose:
+        print(f"Retrieving Weekly Summary for {ticker} (12-month rolling window)...\n")
+
+    if limit > 1000:
+        raise ValueError("Limit must be <= 1000 (FINRA API constraint).")
+
+    url = "https://api.finra.org/data/group/otcMarket/name/weeklySummary"
+    offset = 0
+    all_batches = []
+
+    # Build compare filters
+    filters = [
+        {
+            "compareType": "equal",
+            "fieldName": "issueSymbolIdentifier",
+            "fieldValue": ticker.upper()
+        }
+    ]
+
+    fields = [
+        "totalWeeklyShareQuantity",
+        "issueSymbolIdentifier",
+        "issueName",
+        "lastUpdateDate",
+        "lastReportedDate",
+        "tierDescription",
+        "initialPublishedDate",
+        "tierIdentifier",
+        "summaryStartDate",
+        "totalWeeklyTradeCount",
+        "weekStartDate",
+        "MPID",
+        "firmCRDNumber",
+        "productTypeCode",
+        "marketParticipantName",
+        "summaryTypeCode"
+    ]
+
+    while True:
+        body = {
+            "limit": limit,
+            "offset": offset,
+            "fields": fields,
+            "compareFilters": filters
+        }
+
+        if verbose:
+            print(f"Fetching offset={offset}, limit={limit}")
+
+        df = make_safe_request(
+            endpoint=url,
+            timeout=30,
+            params=None,
+            json=body,
+            auth=True,
+            jwt_key=jwt_token,
+            verbose=verbose
+        )
+
+        if df is None or df.empty:
+            if verbose:
+                print("No more records found.")
+            break
+
+        all_batches.append(df)
+        if len(df) < limit:
+            break
+
+        offset += limit
+
+    if not all_batches:
+        if verbose:
+            print("No data returned.")
+        return pd.DataFrame()
+
+    final_df = pd.concat(all_batches, ignore_index=True)
+
+    if verbose:
+        print(f"Total records retrieved for {ticker}: {len(final_df)}")
+
+    return final_df
+
+
 
 if __name__ == "__main__":
     client_id = return_FINRA_client_id()
     client_secret = return_FINRA_client_secret()
     jwt, expires = get_bearer_token(client_id=client_id, client_secret=client_secret)
 
-    data = get_otc_block_summary(jwt_token=jwt, limit=100, verbose=True)
-    data.to_csv("data.csv")
+    # Fetch last year’s weekly data
+    df_weekly = get_weekly_summary(
+        jwt_token=jwt,
+        ticker="AAPL",
+        verbose=True
+    )
+    df_weekly.to_csv("data1.csv")
