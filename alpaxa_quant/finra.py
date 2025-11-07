@@ -1,13 +1,9 @@
-from ast import Tuple
-from math import exp
-
-from pytest import param
-from alpaxa_quant.config import return_FINRA_client_id, return_FINRA_client_secret
 from alpaxa_quant.utils import make_safe_request
+from typing import Any, Dict, Optional
+from ast import Tuple
+import pandas as pd
 import requests
 import base64
-from typing import Any, Dict, Optional
-import pandas as pd
 
 def get_bearer_token(client_id: str, client_secret: str) -> Tuple:
     """
