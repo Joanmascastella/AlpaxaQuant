@@ -1,8 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
-import logging
-import os
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
@@ -12,6 +10,7 @@ import json
 from typing import Dict, List, Set, Union, Optional
 from dataclasses import dataclass
 from logging.handlers import RotatingFileHandler
+import re
 
 @dataclass
 class ScraperConfig:
@@ -70,17 +69,17 @@ class OpenInsiderScraper:
     
     def _get_data_for_month(self, year: int, month: int) -> Set[tuple]:
         cache_path = self._get_cache_path(year, month)
-        
+
         if self.config.cache_enabled and self._is_cache_valid(cache_path):
             with open(cache_path, 'r') as f:
                 return set(tuple(x) for x in json.load(f))
-        
+
         start_date = datetime(year, month, 1).strftime('%m/%d/%Y')
         end_date = (datetime(year, month, 1) + timedelta(days=32)).replace(day=1) - timedelta(days=1)
         end_date = end_date.strftime('%m/%d/%Y')
-        
+
         url = f'http://openinsider.com/screener?s=&o=&pl=&ph=&ll=&lh=&fd=-1&fdr={start_date}+-+{end_date}&td=0&tdr=&fdlyl=&fdlyh=&daysago=&xp=1&xs=1&vl=&vh=&ocl=&och=&sic1=-1&sicl=100&sich=9999&grp=0&nfl=&nfh=&nil=&nih=&nol=&noh=&v2l=&v2h=&oc2l=&oc2h=&sortcol=0&cnt=5000&page=1'
-        
+
         try:
             response = self._fetch_data(url)
             soup = BeautifulSoup(response.text, 'html.parser')
@@ -89,38 +88,74 @@ class OpenInsiderScraper:
                 print(f"No table found for {month}-{year}")
                 return set()
 
-            # ✅ Replace deprecated findAll with find_all
             rows = table.find('tbody').find_all('tr')
             data = set()
 
             for row in rows:
-                cols = row.find_all('td')
-                if not cols:
+                cols = row.find_all("td")
+                if len(cols) < 13:  # Need at least 13 columns now
                     continue
 
-                insider_data = {
-                    key: cols[index].find('a').text.strip() if cols[index].find('a') else cols[index+1].text.strip()
-                    for index, key in enumerate([
-                        'transaction_date', 'trade_date', 'ticker', 'company_name', 
-                        'owner_name', 'Title', 'transaction_type', 'last_price', 'Qty', 
-                        'shares_held', 'Owned', 'Value'
-                    ])
-                }
+                try:
+                    # Correct mapping based on actual OpenInsider column structure
+                    # OpenInsider columns: X, Filing Date, Trade Date, Ticker, Company Name, Insider Name, Title, Trans Type, Last Price, Qty, Owned, ΔOwn, Value
+                    filing_date = cols[1].get_text(strip=True)  # Skip X column (cols[0])
+                    trade_date = cols[2].get_text(strip=True)
+                    ticker = cols[3].get_text(strip=True)
+                    company_name = cols[4].get_text(strip=True)
+                    insider_name = cols[5].get_text(strip=True)
+                    title = cols[6].get_text(strip=True)
+                    transaction_type = cols[7].get_text(strip=True)
+                    last_price = cols[8].get_text(strip=True)
+                    qty = cols[9].get_text(strip=True)
+                    shares_held = cols[10].get_text(strip=True)
+                    owned = cols[11].get_text(strip=True)
+                    value = cols[12].get_text(strip=True)
 
-                # Apply filters
-                if self._apply_filters(insider_data):
-                    data.add(tuple(insider_data.values()))
+                    # Clean transaction type ("S - Sale" → "S")
+                    transaction_type = re.sub(r"\s*-\s*.*", "", transaction_type).strip()
 
-            # Save cache
+                    insider_data = (
+                        filing_date,
+                        trade_date,
+                        ticker,
+                        company_name,
+                        insider_name,
+                        title,
+                        transaction_type,
+                        last_price,
+                        qty,
+                        shares_held,
+                        owned,
+                        value
+                    )
+
+                    # Apply filters
+                    if self._apply_filters({
+                        "ticker": ticker,
+                        "transaction_type": transaction_type,
+                        "Value": value,
+                        "Qty": qty
+                    }):
+                        data.add(insider_data)
+
+                except Exception as e:
+                    print(f"Error parsing row: {str(e)}")
+                    continue
+
+
+            # Save cache if enabled
             if self.config.cache_enabled:
                 with open(cache_path, 'w') as f:
                     json.dump([list(x) for x in data], f)
-            
+
             return data
-            
+
         except Exception as e:
             print(f"Error fetching data for {month}-{year}: {str(e)}")
             return set()
+
+
     
     def _clean_numeric(self, value: str) -> float:
         """Clean numeric values from strings, handling currency, percentages, and text."""
@@ -199,13 +234,73 @@ class OpenInsiderScraper:
         print(f"Scraping completed. Found {len(all_data)} transactions.")
         return self._save_data(all_data)
     
-    def _save_data(self, data: List[tuple]) -> pd.DataFrame():
-        field_names = ['transaction_date', 'trade_date', 'ticker', 'company_name', 
-                      'owner_name', 'Title', 'transaction_type', 'last_price', 
-                      'Qty', 'shares_held', 'Owned', 'Value']
-        
+    def _save_data(self, data: List[tuple]) -> pd.DataFrame:
+
+        # Define the expected schema
+        field_names = [
+            "filing_date", "trade_date", "ticker", "company_name",
+            "owner_name", "Title", "transaction_type", "last_price",
+            "Qty", "shares_held", "Owned", "Value"
+        ]
+
         df = pd.DataFrame(data, columns=field_names)
-        print(f"Data scraped: {df.head(5)}")
+
+        # --- 1️⃣ Drop redundant 'company_name' ---
+        if "company_name" in df.columns:
+            df = df.drop(columns=["company_name"])
+
+        # --- 2️⃣ Clean missing text fields ---
+        for col in ["owner_name", "Title"]:
+            df[col] = (
+                df[col]
+                .astype(str)
+                .replace({"": None, "nan": None, "None": None})
+                .str.strip()
+            )
+
+        # --- 3️⃣ Standardize transaction type ---
+        # Convert "S - Sale" → "S", "P - Purchase" → "P", etc.
+        df["transaction_type"] = (
+            df["transaction_type"]
+            .astype(str)
+            .str.strip()
+            .str.replace(r"\s*-\s*.*", "", regex=True)
+            .str.replace(r"[^A-Z]", "", regex=True)
+            .replace("", None)
+        )
+
+        # --- 4️⃣ Clean numeric fields safely ---
+        numeric_cols = ["last_price", "Qty", "shares_held", "Owned", "Value"]
+
+        for col in numeric_cols:
+            if col in df.columns:
+                df[col] = (
+                    df[col]
+                    .astype(str)
+                    .str.replace(",", "", regex=False)
+                    .str.replace("%", "", regex=False)
+                    .str.replace(r"[^\d\.\-\+]", "", regex=True)
+                    .replace("", None)
+                )
+                # Convert to float safely; any non-convertible value becomes NaN
+                df[col] = pd.to_numeric(df[col], errors="coerce")
+
+        # --- 5️⃣ Clean up date fields ---
+        for date_col in ["filing_date", "trade_date"]:
+            if date_col in df.columns:
+                df[date_col] = pd.to_datetime(df[date_col], errors="coerce").dt.date
+
+        # --- 6️⃣ Remove rows with no ticker or transaction type ---
+        df = df.dropna(subset=["ticker", "transaction_type"], how="any")
+
+        # --- 7️⃣ Sort and reset index ---
+        df = df.sort_values(by=["ticker", "filing_date"], ascending=[True, False]).reset_index(drop=True)
+
+        # --- 8️⃣ Final report ---
+        total = len(df)
+        tickers = df["ticker"].nunique()
+        print(f"✅ Cleaned {total} transactions from {tickers} unique tickers.")
+        print(df.head(5))
 
         return df
 
@@ -268,7 +363,7 @@ def get_insider_trades(config: Dict) -> pd.DataFrame:
     Key Features
     -------------------------------------------------------------------------------
     - Multi-threaded Collection:
-      Fetches data across multiple months and years in parallel using Python’s 
+      Fetches data across multiple months and years in parallel using Python's 
       ThreadPoolExecutor for optimal speed.
 
     - Smart Caching System:
@@ -298,12 +393,11 @@ def get_insider_trades(config: Dict) -> pd.DataFrame:
     -------------------------------------------------------------------------------
     Each returned record includes the following fields:
 
-    transaction_date   - Date the transaction was filed
+    filing_date        - Date the transaction was filed with SEC
     trade_date         - Date the trade occurred
     ticker             - Stock ticker symbol
-    company_name       - Company name
     owner_name         - Name of the insider
-    Title              - Insider’s role or title
+    Title              - Insider's role or title
     transaction_type   - Type of transaction (P, S, A, etc.)
     last_price         - Last price of the traded stock
     Qty                - Quantity of shares traded
@@ -321,9 +415,9 @@ def get_insider_trades(config: Dict) -> pd.DataFrame:
     -------------------------------------------------------------------------------
     Notes
     -------------------------------------------------------------------------------
-    - The tool respects the source website’s structure but may need updates if the
+    - The tool respects the source website's structure but may need updates if the
       HTML layout of openinsider.com changes.
-    - Use responsibly in accordance with the website’s terms of service.
+    - Use responsibly in accordance with the website's terms of service.
     - Large time ranges can result in long execution times or large memory usage.
 
     -------------------------------------------------------------------------------
@@ -364,8 +458,6 @@ def get_insider_trades(config: Dict) -> pd.DataFrame:
     project (https://github.com/sd3v/openinsiderData), modernized for structured 
     configuration, improved modularity, and integration into the AlpaxaQuant package.
     """
-
-
     try:
         scraper = OpenInsiderScraper(config)
         df = scraper.scrape()
@@ -375,28 +467,28 @@ def get_insider_trades(config: Dict) -> pd.DataFrame:
         raise
 
 
-if __name__ == '__main__':
-    config = {
-        "scraping": {
-            "start_year": 2020,   # From which year data should be retrieved
-            "start_month": 1,     # From which month in start_year
-            "max_workers": 10,    # Number of parallel downloads
-            "retry_attempts": 3,  # Number of retry attempts on errors
-            "timeout": 30         # Timeout in seconds for HTTP requests
-        },
-        "filters": {
-            "min_transaction_value": 0,    # Minimum transaction value in USD
-            "transaction_types": [],       # Empty = all types, or list: ["P", "S", "A", etc.]
-            "exclude_companies": [],       # List of ticker symbols to exclude
-            "include_companies": ["TSLA", "AAPL", "AAOI"],       # List of ticker symbols to include
-            "min_shares_traded": 0         # Minimum number of traded shares
-        },
-        "cache": {
-            "enabled": True,        # Enable/disable cache
-            "directory": ".cache",  # Cache directory
-            "max_age": 24           # Maximum age of cache files in hours
-        }
-    }
-    df = get_insider_trades(config)
-    df = df.sort_values(by="ticker")
-    df.to_csv("insider_trades.csv", index=False)
+# if __name__ == '__main__':
+#     config = {
+#         "scraping": {
+#             "start_year": 2013,   # From which year data should be retrieved
+#             "start_month": 1,     # From which month in start_year
+#             "max_workers": 10,    # Number of parallel downloads
+#             "retry_attempts": 3,  # Number of retry attempts on errors
+#             "timeout": 30         # Timeout in seconds for HTTP requests
+#         },
+#         "filters": {
+#             "min_transaction_value": 0,    # Minimum transaction value in USD
+#             "transaction_types": [],       # Empty = all types, or list: ["P", "S", "A", etc.]
+#             "exclude_companies": [],       # List of ticker symbols to exclude
+#             "include_companies": ["TSLA", "AAPL", "AAOI"],       # List of ticker symbols to include
+#             "min_shares_traded": 0         # Minimum number of traded shares
+#         },
+#         "cache": {
+#             "enabled": False,        # Enable/disable cache
+#             "directory": ".cache",  # Cache directory
+#             "max_age": 24           # Maximum age of cache files in hours
+#         }
+#     }
+#     df = get_insider_trades(config)
+#     df = df.sort_values(by="ticker")
+#     df.to_csv("insider_trades.csv", index=False)
