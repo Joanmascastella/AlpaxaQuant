@@ -466,29 +466,3 @@ def get_insider_trades(config: Dict) -> pd.DataFrame:
         print(f"The following error occured: {str(e)}")
         raise
 
-
-# if __name__ == '__main__':
-#     config = {
-#         "scraping": {
-#             "start_year": 2013,   # From which year data should be retrieved
-#             "start_month": 1,     # From which month in start_year
-#             "max_workers": 10,    # Number of parallel downloads
-#             "retry_attempts": 3,  # Number of retry attempts on errors
-#             "timeout": 30         # Timeout in seconds for HTTP requests
-#         },
-#         "filters": {
-#             "min_transaction_value": 0,    # Minimum transaction value in USD
-#             "transaction_types": [],       # Empty = all types, or list: ["P", "S", "A", etc.]
-#             "exclude_companies": [],       # List of ticker symbols to exclude
-#             "include_companies": ["TSLA", "AAPL", "AAOI"],       # List of ticker symbols to include
-#             "min_shares_traded": 0         # Minimum number of traded shares
-#         },
-#         "cache": {
-#             "enabled": False,        # Enable/disable cache
-#             "directory": ".cache",  # Cache directory
-#             "max_age": 24           # Maximum age of cache files in hours
-#         }
-#     }
-#     df = get_insider_trades(config)
-#     df = df.sort_values(by="ticker")
-#     df.to_csv("insider_trades.csv", index=False)
