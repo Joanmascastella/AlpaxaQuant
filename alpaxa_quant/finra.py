@@ -181,8 +181,206 @@ def get_consolidated_short_interest(
 
     return final_df
 
+def get_monthly_summary(
+    jwt_token: str,
+    ticker: str,
+    limit: int = 1000,
+    verbose: bool = False
+) -> pd.DataFrame:
+    """
+        Retrieve ALL monthly summary data for a specific ticker symbol
+        using FINRA's pagination system (limit + offset), via make_safe_request.
 
+        Args:
+            jwt_token (str): Bearer token retrieved by get_bearer_token.
+            ticker (str): The ticker symbol to filter for (e.g. 'TSLA').
+            limit (int): The maximum number of records per request (<=1000).
+            verbose (bool): Print debug and progress logs.
 
+        Returns:
+            pd.DataFrame: Combined DataFrame of all available monthly summary records.
+    """
+
+    if verbose:
+        print(f"Retrieving montly summary for {ticker}...\n")
+
+    if limit > 1000:
+        raise ValueError("Limit must be <= 1000 (FINRA API constraint).")
+
+    url = "https://api.finra.org/data/group/otcMarket/name/monthlySummary"
+    offset = 0
+    all_batches = []
+
+    while True:
+        body = {
+            "limit": limit,
+            "offset": offset,
+            "compareFilters": [
+                {
+                    "compareType": "equal",
+                    "fieldName": "issueSymbolIdentifier",
+                    "fieldValue": ticker.upper()
+                }
+            ],
+            "fields": [
+                "issueSymbolIdentifier",
+                "issueName",
+                "lastUpdateDate",
+                "lastReportedDate",
+                "initialPublishedDate",
+                "tierIdentifier",
+                "summaryStartDate",
+                "monthStartDate",
+                "totalMonthlyTradeCount",
+                "firmCRDNumber",
+                "productTypeCode",
+                "marketParticipantName",
+                "totalMonthlyShareQuantity",
+                "summaryTypeCode"
+            ]
+        }
+        
+
+        if verbose:
+            print(f"Fetching offset={offset}, limit={limit} for {ticker}")
+
+        df = make_safe_request(
+            endpoint=url,
+            timeout=30,
+            params=None,
+            json=body,
+            auth=True,
+            jwt_key=jwt_token,
+            verbose=verbose
+        )
+
+        if df is None or df.empty:
+            if verbose:
+                print("No more records found, stopping pagination.")
+            break
+
+        all_batches.append(df)
+        if len(df) < limit:
+            if verbose:
+                print(f"Last batch retrieved ({len(df)} rows).")
+            break
+
+        offset += limit 
+
+    if not all_batches:
+        if verbose:
+            print(f"No data returned for ticker {ticker}.")
+        return pd.DataFrame()
+
+    final_df = pd.concat(all_batches, ignore_index=True)
+
+    if verbose:
+        print(f"Total records retrieved for {ticker}: {len(final_df)}")
+
+    return final_df
+
+def get_otc_block_summary(
+    jwt_token: str,
+    limit: int = 1000,
+    verbose: bool = False
+) -> pd.DataFrame:
+    """
+        Aggregated OTC (Non-ATS) trade data in NMS stocks that meets certain share based and dollar based thresholds.
+
+        Args:
+            jwt_token (str): Bearer token retrieved by get_bearer_token.
+            limit (int): The maximum number of records per request (<=1000).
+            verbose (bool): Print debug and progress logs.
+
+        Returns:
+            pd.DataFrame: Combined DataFrame of all available OTC block summary data...
+    """
+
+    if verbose:
+        print(f"Retrieving OTC block summary data...\n")
+
+    if limit > 1000:
+        raise ValueError("Limit must be <= 1000 (FINRA API constraint).")
+
+    url = "https://api.finra.org/data/group/otcMarket/name/otcBlocksSummary"
+    offset = 0
+    all_batches = []
+
+    while True:
+        body = {
+            "limit": limit,
+            "offset": offset,
+            "fields":[
+                "OTCBlockBusinessSharePercent",
+                "OTCBlockBusinessShareRank",
+                "OTCBlockBusinessTradePercent",
+                "OTCBlockBusinessTradeRank",
+                "OTCBlockCount",
+                "OTCBlockQuantity",
+                "OTCBlockSharePercent",
+                "OTCBlockShareRank",
+                "OTCBlockTradePercent",
+                "OTCBlockTradeRank",
+                "OTCSharePercent",
+                "OTCShareRank",
+                "OTCTradePercent",
+                "OTCTradeRank",
+                "atsOtc",
+                "averageBlockSize",
+                "averageBlockSizeRank",
+                "averageTradeSize",
+                "averageTradeSizeRank",
+                "crdFirmName",
+                "initialPublishedDate",
+                "lastReportedDate",
+                "lastUpdateDate",
+                "monthStartDate",
+                "summaryStartDate",
+                "summaryTypeCode",
+                "summaryTypeDescription",
+                "totalShareQuantity",
+                "totalTradeCount"
+            ]
+        }
+        
+
+        if verbose:
+            print(f"Fetching offset={offset}, limit={limit}")
+
+        df = make_safe_request(
+            endpoint=url,
+            timeout=30,
+            params=None,
+            json=body,
+            auth=True,
+            jwt_key=jwt_token,
+            verbose=verbose
+        )
+
+        if df is None or df.empty:
+            if verbose:
+                print("No more records found, stopping pagination.")
+            break
+
+        all_batches.append(df)
+        if len(df) < limit:
+            if verbose:
+                print(f"Last batch retrieved ({len(df)} rows).")
+            break
+
+        offset += limit 
+
+    if not all_batches:
+        if verbose:
+            print(f"No data returned.")
+        return pd.DataFrame()
+
+    final_df = pd.concat(all_batches, ignore_index=True)
+
+    if verbose:
+        print(f"Total records retrieved: {len(final_df)}")
+
+    return final_df
 
 
 
@@ -191,6 +389,5 @@ if __name__ == "__main__":
     client_secret = return_FINRA_client_secret()
     jwt, expires = get_bearer_token(client_id=client_id, client_secret=client_secret)
 
-    fields = ["MPID","marketParticipantName","totalTradeCount"]
-    data = get_consolidated_short_interest(jwt_token=jwt, limit=1000, ticker="BA", verbose=True)
+    data = get_otc_block_summary(jwt_token=jwt, limit=100, verbose=True)
     data.to_csv("data.csv")
