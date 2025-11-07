@@ -474,7 +474,6 @@ def get_daily_short_volume_sale(
 
     return final_df
 
-
 def get_weekly_summary(
     jwt_token: str,
     ticker: str,
@@ -578,16 +577,628 @@ def get_weekly_summary(
     return final_df
 
 
+def get_agency_debt_market_breadth(
+    jwt_token: str,
+    limit: int = 1000,
+    verbose: bool = False
+) -> pd.DataFrame:
+    """
+    Retrieve ALL available agency debt market breadth.
 
-if __name__ == "__main__":
-    client_id = return_FINRA_client_id()
-    client_secret = return_FINRA_client_secret()
-    jwt, expires = get_bearer_token(client_id=client_id, client_secret=client_secret)
+    Args:
+        jwt_token (str): FINRA bearer token.
+        limit (int): Max records per request.
+        verbose (bool): Print debug output.
 
-    # Fetch last year’s weekly data
-    df_weekly = get_weekly_summary(
-        jwt_token=jwt,
-        ticker="AAPL",
-        verbose=True
-    )
-    df_weekly.to_csv("data1.csv")
+    Returns:
+        pd.DataFrame: All available agency debt market breadth.
+    """
+
+    if verbose:
+        print(f"Retrieving agency debt market debth ...\n")
+
+    if limit > 1000:
+        raise ValueError("Limit must be <= 1000 (FINRA API constraint).")
+
+    url = "https://api.finra.org/data/group/fixedIncomeMarket/name/agencyMarketBreadth"
+    offset = 0
+    all_batches = []
+
+    while True:
+        params = {
+            "limit": limit,
+            "offset": offset,
+        }
+
+        if verbose:
+            print(f"Fetching offset={offset}, limit={limit}")
+
+        df = make_safe_request(
+            endpoint=url,
+            timeout=30,
+            params=params,
+            auth=True,
+            jwt_key=jwt_token,
+            verbose=verbose
+        )
+
+        if df is None or df.empty:
+            if verbose:
+                print("No more records found.")
+            break
+
+        all_batches.append(df)
+        if len(df) < limit:
+            break
+
+        offset += limit
+
+    if not all_batches:
+        if verbose:
+            print("No data returned.")
+        return pd.DataFrame()
+
+    final_df = pd.concat(all_batches, ignore_index=True)
+
+    if verbose:
+        print(f"Total records retrieved: {len(final_df)}")
+
+    return final_df
+
+def get_agency_debt_market_sentiment(
+    jwt_token: str,
+    limit: int = 1000,
+    verbose: bool = False
+) -> pd.DataFrame:
+    """
+    Retrieve ALL available agency debt market sentiment.
+
+    Args:
+        jwt_token (str): FINRA bearer token.
+        limit (int): Max records per request.
+        verbose (bool): Print debug output.
+
+    Returns:
+        pd.DataFrame: All available agency debt market sentiment.
+    """
+
+    if verbose:
+        print(f"Retrieving agency debt market sentiment ...\n")
+
+    if limit > 1000:
+        raise ValueError("Limit must be <= 1000 (FINRA API constraint).")
+
+    url = "https://api.finra.org/data/group/fixedIncomeMarket/name/agencyMarketSentiment"
+    offset = 0
+    all_batches = []
+
+    while True:
+        params = {
+            "limit": limit,
+            "offset": offset,
+        }
+
+        if verbose:
+            print(f"Fetching offset={offset}, limit={limit}")
+
+        df = make_safe_request(
+            endpoint=url,
+            timeout=30,
+            params=params,
+            auth=True,
+            jwt_key=jwt_token,
+            verbose=verbose
+        )
+
+        if df is None or df.empty:
+            if verbose:
+                print("No more records found.")
+            break
+
+        all_batches.append(df)
+        if len(df) < limit:
+            break
+
+        offset += limit
+
+    if not all_batches:
+        if verbose:
+            print("No data returned.")
+        return pd.DataFrame()
+
+    final_df = pd.concat(all_batches, ignore_index=True)
+
+    if verbose:
+        print(f"Total records retrieved: {len(final_df)}")
+
+    return final_df
+
+def get_corporate_debt_market_breadth(
+    jwt_token: str,
+    limit: int = 1000,
+    verbose: bool = False
+) -> pd.DataFrame:
+    """
+    Retrieve ALL available corporate debt market breadth.
+
+    Args:
+        jwt_token (str): FINRA bearer token.
+        limit (int): Max records per request.
+        verbose (bool): Print debug output.
+
+    Returns:
+        pd.DataFrame: All available corporate debt market breadth.
+    """
+
+    if verbose:
+        print(f"Retrieving corporate debt market breadth ...\n")
+
+    if limit > 1000:
+        raise ValueError("Limit must be <= 1000 (FINRA API constraint).")
+
+    url = "https://api.finra.org/data/group/fixedIncomeMarket/name/corporate144AMarketBreadth"
+    offset = 0
+    all_batches = []
+
+    while True:
+        params = {
+            "limit": limit,
+            "offset": offset,
+        }
+
+        if verbose:
+            print(f"Fetching offset={offset}, limit={limit}")
+
+        df = make_safe_request(
+            endpoint=url,
+            timeout=30,
+            params=params,
+            auth=True,
+            jwt_key=jwt_token,
+            verbose=verbose
+        )
+
+        if df is None or df.empty:
+            if verbose:
+                print("No more records found.")
+            break
+
+        all_batches.append(df)
+        if len(df) < limit:
+            break
+
+        offset += limit
+
+    if not all_batches:
+        if verbose:
+            print("No data returned.")
+        return pd.DataFrame()
+
+    final_df = pd.concat(all_batches, ignore_index=True)
+
+    if verbose:
+        print(f"Total records retrieved: {len(final_df)}")
+
+    return final_df
+
+def get_corporate_debt_market_sentiment(
+    jwt_token: str,
+    limit: int = 1000,
+    verbose: bool = False
+) -> pd.DataFrame:
+    """
+    Retrieve ALL available corporate debt market sentiment.
+
+    Args:
+        jwt_token (str): FINRA bearer token.
+        limit (int): Max records per request.
+        verbose (bool): Print debug output.
+
+    Returns:
+        pd.DataFrame: All available corporate debt market sentiment.
+    """
+
+    if verbose:
+        print(f"Retrieving corporate debt market sentiment ...\n")
+
+    if limit > 1000:
+        raise ValueError("Limit must be <= 1000 (FINRA API constraint).")
+
+    url = "https://api.finra.org/data/group/fixedIncomeMarket/name/corporate144AMarketSentiment"
+    offset = 0
+    all_batches = []
+
+    while True:
+        params = {
+            "limit": limit,
+            "offset": offset,
+        }
+
+        if verbose:
+            print(f"Fetching offset={offset}, limit={limit}")
+
+        df = make_safe_request(
+            endpoint=url,
+            timeout=30,
+            params=params,
+            auth=True,
+            jwt_key=jwt_token,
+            verbose=verbose
+        )
+
+        if df is None or df.empty:
+            if verbose:
+                print("No more records found.")
+            break
+
+        all_batches.append(df)
+        if len(df) < limit:
+            break
+
+        offset += limit
+
+    if not all_batches:
+        if verbose:
+            print("No data returned.")
+        return pd.DataFrame()
+
+    final_df = pd.concat(all_batches, ignore_index=True)
+
+    if verbose:
+        print(f"Total records retrieved: {len(final_df)}")
+
+    return final_df
+
+
+def get_corporate_and_agency_capped_volume(
+    jwt_token: str,
+    limit: int = 1000,
+    verbose: bool = False
+) -> pd.DataFrame:
+    """
+    Retrieve ALL available corporate and agency capped volume.
+
+    Args:
+        jwt_token (str): FINRA bearer token.
+        limit (int): Max records per request.
+        verbose (bool): Print debug output.
+
+    Returns:
+        pd.DataFrame: All available corporate and agency capped volume.
+    """
+
+    if verbose:
+        print(f"Retrieving corporate and agency capped volume ...\n")
+
+    if limit > 1000:
+        raise ValueError("Limit must be <= 1000 (FINRA API constraint).")
+
+    url = "https://api.finra.org/data/group/fixedIncomeMarket/name/corporatesAndAgenciesCappedVolume"
+    offset = 0
+    all_batches = []
+
+    while True:
+        params = {
+            "limit": limit,
+            "offset": offset,
+        }
+
+        if verbose:
+            print(f"Fetching offset={offset}, limit={limit}")
+
+        df = make_safe_request(
+            endpoint=url,
+            timeout=30,
+            params=params,
+            auth=True,
+            jwt_key=jwt_token,
+            verbose=verbose
+        )
+
+        if df is None or df.empty:
+            if verbose:
+                print("No more records found.")
+            break
+
+        all_batches.append(df)
+        if len(df) < limit:
+            break
+
+        offset += limit
+
+    if not all_batches:
+        if verbose:
+            print("No data returned.")
+        return pd.DataFrame()
+
+    final_df = pd.concat(all_batches, ignore_index=True)
+
+    if verbose:
+        print(f"Total records retrieved: {len(final_df)}")
+
+    return final_df
+
+def get_corporate_debt_market_sentiment(
+    jwt_token: str,
+    limit: int = 1000,
+    verbose: bool = False
+) -> pd.DataFrame:
+    """
+    Retrieve ALL available corporate debt market sentiment.
+
+    Args:
+        jwt_token (str): FINRA bearer token.
+        limit (int): Max records per request.
+        verbose (bool): Print debug output.
+
+    Returns:
+        pd.DataFrame: All available corporate debt market sentiment.
+    """
+
+    if verbose:
+        print(f"Retrieving corporate debt market sentiment ...\n")
+
+    if limit > 1000:
+        raise ValueError("Limit must be <= 1000 (FINRA API constraint).")
+
+    url = "https://api.finra.org/data/group/fixedIncomeMarket/name/corporateMarketSentiment"
+    offset = 0
+    all_batches = []
+
+    while True:
+        params = {
+            "limit": limit,
+            "offset": offset,
+        }
+
+        if verbose:
+            print(f"Fetching offset={offset}, limit={limit}")
+
+        df = make_safe_request(
+            endpoint=url,
+            timeout=30,
+            params=params,
+            auth=True,
+            jwt_key=jwt_token,
+            verbose=verbose
+        )
+
+        if df is None or df.empty:
+            if verbose:
+                print("No more records found.")
+            break
+
+        all_batches.append(df)
+        if len(df) < limit:
+            break
+
+        offset += limit
+
+    if not all_batches:
+        if verbose:
+            print("No data returned.")
+        return pd.DataFrame()
+
+    final_df = pd.concat(all_batches, ignore_index=True)
+
+    if verbose:
+        print(f"Total records retrieved: {len(final_df)}")
+
+    return final_df
+
+def get_securitized_product_capped_volume(
+    jwt_token: str,
+    limit: int = 1000,
+    verbose: bool = False
+) -> pd.DataFrame:
+    """
+    Retrieve ALL available securitized product capped volume.
+
+    Args:
+        jwt_token (str): FINRA bearer token.
+        limit (int): Max records per request.
+        verbose (bool): Print debug output.
+
+    Returns:
+        pd.DataFrame: All available securitized product capped volume.
+    """
+
+    if verbose:
+        print(f"Retrieving securitized product capped volume ...\n")
+
+    if limit > 1000:
+        raise ValueError("Limit must be <= 1000 (FINRA API constraint).")
+
+    url = "https://api.finra.org/data/group/fixedIncomeMarket/name/securitizedProductsCappedVolume"
+    offset = 0
+    all_batches = []
+
+    while True:
+        params = {
+            "limit": limit,
+            "offset": offset,
+        }
+
+        if verbose:
+            print(f"Fetching offset={offset}, limit={limit}")
+
+        df = make_safe_request(
+            endpoint=url,
+            timeout=30,
+            params=params,
+            auth=True,
+            jwt_key=jwt_token,
+            verbose=verbose
+        )
+
+        if df is None or df.empty:
+            if verbose:
+                print("No more records found.")
+            break
+
+        all_batches.append(df)
+        if len(df) < limit:
+            break
+
+        offset += limit
+
+    if not all_batches:
+        if verbose:
+            print("No data returned.")
+        return pd.DataFrame()
+
+    final_df = pd.concat(all_batches, ignore_index=True)
+
+    if verbose:
+        print(f"Total records retrieved: {len(final_df)}")
+
+    return final_df
+
+def get_treasury_daily_aggregates(
+    jwt_token: str,
+    limit: int = 1000,
+    verbose: bool = False
+) -> pd.DataFrame:
+    """
+    Retrieve ALL available treasury daily aggregates.
+
+    Args:
+        jwt_token (str): FINRA bearer token.
+        limit (int): Max records per request.
+        verbose (bool): Print debug output.
+
+    Returns:
+        pd.DataFrame: All available treasury daily aggregates.
+    """
+
+    if verbose:
+        print(f"Retrieving treasury daily aggregates ...\n")
+
+    if limit > 1000:
+        raise ValueError("Limit must be <= 1000 (FINRA API constraint).")
+
+    url = "https://api.finra.org/data/group/fixedIncomeMarket/name/treasuryDailyAggregates"
+    offset = 0
+    all_batches = []
+
+    while True:
+        params = {
+            "limit": limit,
+            "offset": offset,
+        }
+
+        if verbose:
+            print(f"Fetching offset={offset}, limit={limit}")
+
+        df = make_safe_request(
+            endpoint=url,
+            timeout=30,
+            params=params,
+            auth=True,
+            jwt_key=jwt_token,
+            verbose=verbose
+        )
+
+        if df is None or df.empty:
+            if verbose:
+                print("No more records found.")
+            break
+
+        all_batches.append(df)
+        if len(df) < limit:
+            break
+
+        offset += limit
+
+    if not all_batches:
+        if verbose:
+            print("No data returned.")
+        return pd.DataFrame()
+
+    final_df = pd.concat(all_batches, ignore_index=True)
+
+    if verbose:
+        print(f"Total records retrieved: {len(final_df)}")
+
+    return final_df
+
+def get_treasury_monthly_aggregates(
+    jwt_token: str,
+    limit: int = 1000,
+    verbose: bool = False
+) -> pd.DataFrame:
+    """
+    Retrieve ALL available treasury monthly aggregates.
+
+    Args:
+        jwt_token (str): FINRA bearer token.
+        limit (int): Max records per request.
+        verbose (bool): Print debug output.
+
+    Returns:
+        pd.DataFrame: All available treasury monthly aggregates.
+    """
+
+    if verbose:
+        print(f"Retrieving treasury monthly aggregates ...\n")
+
+    if limit > 1000:
+        raise ValueError("Limit must be <= 1000 (FINRA API constraint).")
+
+    url = "https://api.finra.org/data/group/fixedIncomeMarket/name/treasuryMonthlyAggregates"
+    offset = 0
+    all_batches = []
+
+    while True:
+        params = {
+            "limit": limit,
+            "offset": offset,
+        }
+
+        if verbose:
+            print(f"Fetching offset={offset}, limit={limit}")
+
+        df = make_safe_request(
+            endpoint=url,
+            timeout=30,
+            params=params,
+            auth=True,
+            jwt_key=jwt_token,
+            verbose=verbose
+        )
+
+        if df is None or df.empty:
+            if verbose:
+                print("No more records found.")
+            break
+
+        all_batches.append(df)
+        if len(df) < limit:
+            break
+
+        offset += limit
+
+    if not all_batches:
+        if verbose:
+            print("No data returned.")
+        return pd.DataFrame()
+
+    final_df = pd.concat(all_batches, ignore_index=True)
+
+    if verbose:
+        print(f"Total records retrieved: {len(final_df)}")
+
+    return final_df
+
+
+# if __name__ == "__main__":
+#     client_id = return_FINRA_client_id()
+#     client_secret = return_FINRA_client_secret()
+#     jwt, expires = get_bearer_token(client_id=client_id, client_secret=client_secret)
+
+#     # Fetch last year’s weekly data
+#     df_weekly = get_securitized_product_capped_volume(
+#         jwt_token=jwt,
+#         verbose=True
+#     )
+#     df_weekly.to_csv("data1.csv")
