@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="alpaxa_quant",
-    version="0.1.0",
+    version="0.3.0",
     packages=find_packages(),
     install_requires=[
         "beautifulsoup4==4.14.2",
