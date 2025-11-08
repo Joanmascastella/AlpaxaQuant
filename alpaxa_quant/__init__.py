@@ -1,75 +1,24 @@
-from .utils import make_safe_request
-from .eodhd import (
-    get_analyst_ratings, 
-    get_ticker_valuation, 
-    get_ticker_highlights, 
-    get_earnings, get_financials, 
-    get_general_ticker_info, 
-    get_historical_ticker_price, 
-    get_holders,
-    get_insider_transactions,
-    get_outstanding_shares,
-    get_shares_stats,
-    get_split_dividends,
-    get_technicals
-    )
-from insider_trades import get_insider_trades
-from finra import (
-    get_agency_debt_market_breadth,
-    get_agency_debt_market_sentiment,
-    get_bearer_token,
-    get_blocks_summary,
-    get_consolidated_short_interest,
-    get_corporate_and_agency_capped_volume,
-    get_corporate_debt_market_breadth,
-    get_corporate_debt_market_sentiment,
-    get_daily_short_volume_sale,
-    get_monthly_summary,
-    get_otc_block_summary,
-    get_securitized_product_capped_volume,
-    get_treasury_daily_aggregates,
-    get_treasury_monthly_aggregates,
-    get_weekly_summary
-)
+from .insider_trades import insider_trades
+from .eodhd import eodhd
+from .finra import finra
+from .utils import utils
+from .fred import fred
 
 __all__ = [
     # utils
-    'make_safe_request',
+    'utils',
 
     # eodhd
-    'get_analyst_ratings',
-    'get_ticker_valuation',
-    'get_ticker_highlights',
-    'get_earnings',
-    'get_financials',
-    'get_general_ticker_info',
-    'get_historical_ticker_price',
-    'get_holders',
-    'get_insider_transactions',
-    'get_outstanding_shares',
-    'get_shares_stats',
-    'get_split_dividends',
-    'get_technicals',
+    'eodhd',
 
     # insider_trades
-    'get_insider_trades',
+    'insider_trades',
 
     # finra
-    'get_agency_debt_market_breadth',
-    'get_agency_debt_market_sentiment',
-    'get_bearer_token',
-    'get_blocks_summary',
-    'get_consolidated_short_interest',
-    'get_corporate_and_agency_capped_volume',
-    'get_corporate_debt_market_breadth',
-    'get_corporate_debt_market_sentiment',
-    'get_daily_short_volume_sale',
-    'get_monthly_summary',
-    'get_otc_block_summary',
-    'get_securitized_product_capped_volume',
-    'get_treasury_daily_aggregates',
-    'get_treasury_monthly_aggregates',
-    'get_weekly_summary',
+    'finra',
+
+    # fred
+    'fred'
 ]
 
 def __version__():
