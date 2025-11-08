@@ -1,4 +1,4 @@
-from insider_trades import get_insider_trades
+from .insider_trades import get_insider_trades
 
 __all__ = [
     # insider_trades
