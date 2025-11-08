@@ -1185,16 +1185,3 @@ def get_treasury_monthly_aggregates(
         print(f"Total records retrieved: {len(final_df)}")
 
     return final_df
-
-
-# if __name__ == "__main__":
-#     client_id = return_FINRA_client_id()
-#     client_secret = return_FINRA_client_secret()
-#     jwt, expires = get_bearer_token(client_id=client_id, client_secret=client_secret)
-
-#     # Fetch last year’s weekly data
-#     df_weekly = get_securitized_product_capped_volume(
-#         jwt_token=jwt,
-#         verbose=True
-#     )
-#     df_weekly.to_csv("data1.csv")

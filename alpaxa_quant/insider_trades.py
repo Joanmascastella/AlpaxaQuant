@@ -7,9 +7,8 @@ from tqdm import tqdm
 from retry import retry
 from pathlib import Path
 import json
-from typing import Dict, List, Set, Union, Optional
+from typing import Dict, List, Set
 from dataclasses import dataclass
-from logging.handlers import RotatingFileHandler
 import re
 
 @dataclass
@@ -93,13 +92,11 @@ class OpenInsiderScraper:
 
             for row in rows:
                 cols = row.find_all("td")
-                if len(cols) < 13:  # Need at least 13 columns now
+                if len(cols) < 13: 
                     continue
 
                 try:
-                    # Correct mapping based on actual OpenInsider column structure
-                    # OpenInsider columns: X, Filing Date, Trade Date, Ticker, Company Name, Insider Name, Title, Trans Type, Last Price, Qty, Owned, ΔOwn, Value
-                    filing_date = cols[1].get_text(strip=True)  # Skip X column (cols[0])
+                    filing_date = cols[1].get_text(strip=True)  
                     trade_date = cols[2].get_text(strip=True)
                     ticker = cols[3].get_text(strip=True)
                     company_name = cols[4].get_text(strip=True)
@@ -236,7 +233,6 @@ class OpenInsiderScraper:
     
     def _save_data(self, data: List[tuple]) -> pd.DataFrame:
 
-        # Define the expected schema
         field_names = [
             "filing_date", "trade_date", "ticker", "company_name",
             "owner_name", "Title", "transaction_type", "last_price",
@@ -245,11 +241,9 @@ class OpenInsiderScraper:
 
         df = pd.DataFrame(data, columns=field_names)
 
-        # --- 1️⃣ Drop redundant 'company_name' ---
         if "company_name" in df.columns:
             df = df.drop(columns=["company_name"])
 
-        # --- 2️⃣ Clean missing text fields ---
         for col in ["owner_name", "Title"]:
             df[col] = (
                 df[col]
@@ -258,8 +252,6 @@ class OpenInsiderScraper:
                 .str.strip()
             )
 
-        # --- 3️⃣ Standardize transaction type ---
-        # Convert "S - Sale" → "S", "P - Purchase" → "P", etc.
         df["transaction_type"] = (
             df["transaction_type"]
             .astype(str)
@@ -269,7 +261,6 @@ class OpenInsiderScraper:
             .replace("", None)
         )
 
-        # --- 4️⃣ Clean numeric fields safely ---
         numeric_cols = ["last_price", "Qty", "shares_held", "Owned", "Value"]
 
         for col in numeric_cols:
@@ -282,24 +273,19 @@ class OpenInsiderScraper:
                     .str.replace(r"[^\d\.\-\+]", "", regex=True)
                     .replace("", None)
                 )
-                # Convert to float safely; any non-convertible value becomes NaN
                 df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        # --- 5️⃣ Clean up date fields ---
         for date_col in ["filing_date", "trade_date"]:
             if date_col in df.columns:
                 df[date_col] = pd.to_datetime(df[date_col], errors="coerce").dt.date
 
-        # --- 6️⃣ Remove rows with no ticker or transaction type ---
         df = df.dropna(subset=["ticker", "transaction_type"], how="any")
 
-        # --- 7️⃣ Sort and reset index ---
         df = df.sort_values(by=["ticker", "filing_date"], ascending=[True, False]).reset_index(drop=True)
 
-        # --- 8️⃣ Final report ---
         total = len(df)
         tickers = df["ticker"].nunique()
-        print(f"✅ Cleaned {total} transactions from {tickers} unique tickers.")
+        print(f"Cleaned {total} transactions from {tickers} unique tickers.")
         print(df.head(5))
 
         return df
