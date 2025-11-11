@@ -1,6 +1,20 @@
+from .fred import (
+    get_daily_ten_year_treasury_constant_maturity,
+    get_five_yield_us,
+    get_ten_yield_us,
+    get_thirty_yield_us,
+    get_twenty_yield_us,
+    get_two_yield_us
+)
 
 __all__ = [
-    
+    'get_daily_ten_year_treasury_constant_maturity',
+    'get_five_yield_us',
+    'get_ten_yield_us',
+    'get_thirty_yield_us',
+    'get_twenty_yield_us',
+    'get_two_yield_us'
+   
 ]
 
 def __version__():

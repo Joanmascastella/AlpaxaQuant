@@ -73,16 +73,16 @@ def make_safe_request(
             print(f"Making request to {endpoint} with timeout {timeout}")
 
         headers = {"Accept": "application/json"}
-        if auth and jwt_key != "":
+        if auth:
+            if jwt_key == "":
+                raise ValueError("JWT was not provided.")
             headers["Authorization"] = f"Bearer {jwt_key}"
-        else:
-            raise ValueError("Please provide a jwt token.")
 
         if json:
             response = requests.post(endpoint, headers=headers, json=json, timeout=timeout)
             response.raise_for_status()
         else:
-            response = requests.get(endpoint, params=params, headers=headers, json=json, timeout=timeout)
+            response = requests.get(endpoint, headers=headers, params=params, timeout=timeout)
             response.raise_for_status()
             
         if verbose:
