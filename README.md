@@ -3,7 +3,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/alpaxa-quant.svg?style=flat-square&color=0078D7)](https://pypi.org/project/alpaxa-quant/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0)
-[![Downloads](https://img.shields.io/pypi/dm/alpaxa-quant.svg?style=flat-square&color=brightgreen)](https://pypi.org/project/alpaxa-quant/)
+[![Downloads](https://static.pepy.tech/badge/alpaxa-quant)](https://pepy.tech/project/alpaxa-quant)
 
 **AlpaxaQuant** is a comprehensive quantitative finance and data acquisition library that unifies financial, macroeconomic, insider, and market-structure data from multiple APIs — including EODHD, FINRA, and FRED — into one modular Python package.
 
