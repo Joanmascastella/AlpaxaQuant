@@ -1,8 +1,9 @@
-from .utils import make_safe_request
+from .utils import make_safe_request, request_util
 
 __all__ = [
     # utils
     'make_safe_request',
+    'request_util'
 ]
 
 def __version__():

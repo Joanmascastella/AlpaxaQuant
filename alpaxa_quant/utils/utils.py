@@ -1,7 +1,41 @@
 from typing import Dict, Any
 import pandas as pd
 import requests
-from io import StringIO
+
+def request_util(params: Dict, base_url:str, verbose: bool) -> pd.DataFrame():
+    start_date = params['observation_start']
+
+    if verbose:
+        print(f"Making request with params: \nSeries ID: {params['series_id']}\nFile Type: {params['file_type']}\nObservation Start Date: {params['observation_start']}\nObservation End Date: {params['observation_end']}\nFrequency: {params['frequency']}\n")
+
+    data = make_safe_request(endpoint=base_url, params=params, verbose=verbose)
+
+    if data is None or data.empty:
+        print("No data returned from FRED.")
+        return pd.DataFrame()
+
+    if "observations" not in data.columns:
+        print("No observations field in response.")
+        return pd.DataFrame()
+
+    observations = data.loc[0, "observations"]
+
+    if not isinstance(observations, list) or len(observations) == 0:
+        print("No observations data available.")
+        return pd.DataFrame()
+
+    df = pd.DataFrame(observations)[["date", "value"]]
+    df["date"] = pd.to_datetime(df["date"])
+    df["value"] = pd.to_numeric(df["value"], errors="coerce")
+    df = df.dropna(subset=["value"])
+    df = df[df["date"] >= pd.to_datetime(start_date)]
+    df = df.set_index("date").rename(columns={"value": "close"}).sort_index()
+
+    if verbose:
+        print(df.head())
+    
+    return df
+
 
 def _normalize_to_df(payload: Any) -> pd.DataFrame | None:
     """
