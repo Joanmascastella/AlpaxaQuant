@@ -19,7 +19,25 @@ from .fred import (
     get_daily_crude_oil_prices,
     get_monthly_crude_oil_prices,
     get_weekly_crude_oil_prices,
-
+    get_daily_aluminum_prices,
+    get_daily_copper_prices,
+    get_daily_corn_prices,
+    get_daily_gold_prices,
+    get_daily_pallaidium_prices,
+    get_daily_platinum_prices,
+    get_daily_silver_prices,
+    get_daily_soybean_prices,
+    get_daily_wheat_prices,
+    get_monthly_aluminum_prices,
+    get_monthly_copper_prices,
+    get_monthly_corn_prices,
+    get_monthly_gold_prices,
+    get_monthly_palladium_prices,
+    get_monthly_platinum_prices,
+    get_monthly_silver_prices,
+    get_monthly_soybean_prices,
+    get_monthly_wheat_prices,
+    
     # ----------------
     # INFLATION / RECESSION
     # ----------------
@@ -170,8 +188,26 @@ __all__ = [
     'get_avg_dairy_prices',
     'get_avg_electricity_prices',
     'get_egg_avg_prices',
+    'get_daily_aluminum_prices',
+    'get_daily_copper_prices',
+    'get_daily_corn_prices',
     'get_daily_crude_oil_prices',
+    'get_daily_gold_prices',
+    'get_daily_pallaidium_prices',
+    'get_daily_platinum_prices',
+    'get_daily_silver_prices',
+    'get_daily_soybean_prices',
+    'get_daily_wheat_prices',
+    'get_monthly_aluminum_prices',
+    'get_monthly_copper_prices',
+    'get_monthly_corn_prices',
     'get_monthly_crude_oil_prices',
+    'get_monthly_gold_prices',
+    'get_monthly_palladium_prices',
+    'get_monthly_platinum_prices',
+    'get_monthly_silver_prices',
+    'get_monthly_soybean_prices',
+    'get_monthly_wheat_prices',
     'get_weekly_crude_oil_prices',
 
     # ----------------
@@ -304,6 +340,7 @@ __all__ = [
     'get_trade_policy_VIX',
     'get_VIX',
 ]
+
 
 
 def __version__():
