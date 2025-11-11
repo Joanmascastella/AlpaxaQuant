@@ -5,7 +5,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/alpaxa-quant.svg?style=flat-square&color=0078D7)](https://pypi.org/project/alpaxa-quant/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0)
-[![Downloads](https://static.pepy.tech/badge/alpaxa-quant)](https://pepy.tech/project/alpaxa-quant)
+[![Downloads](https://static.pepy.tech/badge/alpaxa-quant/week)](https://pepy.tech/project/alpaxa-quant)
 ![Views](https://visitor-badge.laobi.icu/badge?page_id=JMasSolutions.AlpaxaQuant&color=0078D7)
 [![Hits](https://hits.sh/github.com/JMasSolutions/AlpaxaQuant.svg?label=views&color=0078D7&style=flat)](https://hits.sh/github.com/JMasSolutions/AlpaxaQuant/)
 
