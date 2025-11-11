@@ -76,5 +76,5 @@ Issues = "https://github.com/Joanmascastella/AlpaxaQuant/issues"
 
 [tool.setuptools.dynamic]
 version = { attr = "alpaxa_quant.__about__.__version__" }
-description = { attr = "alpaxa_quant.__about__.__summary__" }
+description = { file = ["README.md"] }
 readme = { file = "README.md", content-type = "text/markdown" }
