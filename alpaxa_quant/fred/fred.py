@@ -611,7 +611,7 @@ def get_real_gdp_growth(api_key: str, base_url: str, start_date: str, end_date: 
         "file_type":       "json",
         "observation_start": start_date,
         "observation_end":   end_date,
-        "frequency":       "m",
+        "frequency":       "q",
     }
     df = request_util(params=params, base_url=base_url, verbose=verbose)
     return df
@@ -861,7 +861,7 @@ def get_semiannual_cpi(api_key: str, base_url: str, start_date: str, end_date: s
         "file_type":       "json",
         "observation_start": start_date,
         "observation_end":   end_date,
-        "frequency":       "m",
+        "frequency":       "sa",
     }
     df = request_util(params=params, base_url=base_url, verbose=verbose)
     return df
@@ -1092,7 +1092,7 @@ def get_annual_federal_funds_effective(api_key: str, base_url: str, start_date: 
         "file_type":       "json",
         "observation_start": start_date,
         "observation_end":   end_date,
-        "frequency":       "y",
+        "frequency":       "a",
     }
     df = request_util(params=params, base_url=base_url, verbose=verbose)
     return df
@@ -1278,7 +1278,7 @@ def get_annual_US_vs_EURO_rate(api_key: str, base_url: str, start_date: str, end
         "file_type":       "json",
         "observation_start": start_date,
         "observation_end":   end_date,
-        "frequency":       "y",
+        "frequency":       "a",
     }
     df = request_util(params=params, base_url=base_url, verbose=verbose)
     return df
@@ -1563,4 +1563,4 @@ def get_ten_year_constant_maturity_minus_three_month_treasury_constant(api_key: 
 if __name__ == "__main__":
     K= return_FRED_test_api_key()
     u= return_FRED_base_api_endpoint()
-    get_daily_gold_prices("2020-01-01","2021-01-01", verbose=True)
+    get_annual_federal_funds_effective(api_key=K, base_url=u, start_date="2020-01-01", end_date="2021-01-01", verbose=True)
