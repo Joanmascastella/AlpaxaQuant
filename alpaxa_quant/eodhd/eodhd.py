@@ -15,7 +15,7 @@ def get_historical_ticker_price(
             from_date: str = None,
             to_date: str = None,
             timeout: int = 10,
-            verbose: bool = True
+            verbose: bool = False
         ) -> pd.DataFrame | None:
         """
         Fetch historical EODHD price data for a given ticker symbol.
@@ -1418,3 +1418,5 @@ def fetch_news_sentiment(
     df.reset_index(drop=True, inplace=True)
 
     return df
+
+
