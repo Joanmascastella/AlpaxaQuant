@@ -1,6 +1,8 @@
 
 # AlpaxaQuant
 
+![Alt](https://repobeats.axiom.co/api/embed/dc5a7b6cda9f5c25931d25c94d4ccee56c2ff69c.svg "Repobeats analytics image")
+
 [![PyPI version](https://img.shields.io/pypi/v/alpaxa-quant.svg?style=flat-square&color=0078D7)](https://pypi.org/project/alpaxa-quant/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Downloads](https://static.pepy.tech/badge/alpaxa-quant)](https://pepy.tech/project/alpaxa-quant)
@@ -236,4 +238,3 @@ Then submit a Pull Request describing your change.
 
 > AlpaxaQuant — bridging financial data, macroeconomic insight, and quantitative modeling into one unified Python toolkit.
 
-![Alt](https://repobeats.axiom.co/api/embed/dc5a7b6cda9f5c25931d25c94d4ccee56c2ff69c.svg "Repobeats analytics image")
