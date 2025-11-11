@@ -3,3 +3,4 @@ alpaxa_quant.egg-info
 .env
 .cache
 dist
+NEW_PACKAGE_VERSION_HOWTO.txt
