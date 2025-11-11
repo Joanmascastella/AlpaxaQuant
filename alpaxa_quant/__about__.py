@@ -39,3 +39,9 @@ __keywords__ = [
     "econometrics",
     "trading models",
 ]
+
+if __name__ == "__main__":
+    print(f"{__title__} v{__version__}")
+    print(f"Author: {__author__} <{__email__}>")
+    print(f"License: {__license__}")
+    print(f"URL: {__uri__}")
