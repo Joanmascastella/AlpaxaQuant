@@ -16,7 +16,7 @@ __summary__ = (
 )
 __uri__ = "https://github.com/Joanmascastella/AlpaxaQuant"
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 __author__ = "Joan Mas Castella"
 __email__ = "jmascastella@gmail.com"
