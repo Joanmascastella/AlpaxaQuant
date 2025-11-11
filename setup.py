@@ -1,17 +1,20 @@
 from setuptools import setup, find_packages
+from pathlib import Path
+import runpy
 
-# Automatically import the package version
-from alpaxa_quant import __version__
+# Load package metadata from __about__.py without importing dependencies
+about = runpy.run_path(Path(__file__).parent / "alpaxa_quant" / "__about__.py")
 
 setup(
     name="alpaxa_quant",
-    version=__version__,
-    author="Joan Mas Castella",
-    author_email="jmascastella@gmail.com",
-    description="Comprehensive quantitative finance toolkit integrating EODHD, FINRA, FRED, and insider trading data.",
+    version=about["__version__"],
+    author=about["__author__"],
+    author_email=about["__email__"],
+    description=about["__summary__"],
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/Joanmascastella/AlpaxaQuant",
+    url=about["__uri__"],
+    license=about["__license__"],
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
@@ -51,7 +54,7 @@ setup(
         "urllib3==2.5.0",
         "webencodings==0.5.1",
         "websockets==15.0.1",
-        "yfinance==0.2.66"
+        "yfinance==0.2.66",
     ],
     python_requires=">=3.9",
     classifiers=[
