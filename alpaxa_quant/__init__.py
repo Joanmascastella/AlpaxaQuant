@@ -30,7 +30,7 @@ __all__ = [
     'fred',
 ]
 
-__version__ = "1.0"
+__version__ = "1.0.1"
 
 
 def describe():
