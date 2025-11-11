@@ -235,3 +235,5 @@ Then submit a Pull Request describing your change.
 ---
 
 > AlpaxaQuant — bridging financial data, macroeconomic insight, and quantitative modeling into one unified Python toolkit.
+
+![Alt](https://repobeats.axiom.co/api/embed/dc5a7b6cda9f5c25931d25c94d4ccee56c2ff69c.svg "Repobeats analytics image")
