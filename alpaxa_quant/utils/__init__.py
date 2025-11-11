@@ -7,9 +7,7 @@ __all__ = [
     'make_yf_request'
 ]
 
-def __version__():
-    """Return the version of the Alpaxa Quant Package."""
-    return "0.0.1"
+__version__ = "1.0"
 
 def describe():
     """Print a description of the package and its features."""
