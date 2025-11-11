@@ -1,9 +1,10 @@
-from .utils import make_safe_request, request_util
+from .utils import make_safe_request, request_util, make_yf_request
 
 __all__ = [
     # utils
     'make_safe_request',
-    'request_util'
+    'request_util',
+    'make_yf_request'
 ]
 
 def __version__():

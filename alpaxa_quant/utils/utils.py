@@ -1,6 +1,7 @@
-from typing import Dict, Any
+from typing import Dict, Any, Literal
 import pandas as pd
 import requests
+import yfinance as yf
 
 def request_util(params: Dict, base_url:str, verbose: bool) -> pd.DataFrame():
     start_date = params['observation_start']
@@ -67,6 +68,42 @@ def _normalize_to_df(payload: Any) -> pd.DataFrame | None:
         return pd.DataFrame([payload])
 
     return pd.DataFrame([{"value": payload}])
+
+def make_yf_request(
+    ticker: str,
+    start_date: str,
+    end_date: str, 
+    interval: Literal['1m', '2m', '5m', '15m', '30m', '60m', '90m', '1h', '1d', '5d', '1wk', '1mo', '3mo'] = '1d',
+    timeout: int = 30,
+    verbose: bool = False
+) -> pd.DataFrame():
+    """
+    Performs a yf finance request for tickers which are not available on other data providers
+    """
+    if verbose:
+        print(f"Making YF request for: \nTicker:{ticker}\nStart Date:{start_date}\nEnd Date:{end_date}")
+
+    try:
+        response = yf.download(tickers=ticker, start=start_date, end=end_date, interval=interval, timeout=timeout, auto_adjust=True)
+
+        if verbose:
+            print(f'Rows retrieved {len(response)}')
+        
+        if verbose: 
+            print(f'Example of data retrieved: {response}')
+        
+        df = _normalize_to_df(response)
+
+        return df
+
+
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+        return None
+
+    except ValueError as e:
+        print(f"Failed to parse JSON: {e}")
+        return None
 
 def make_safe_request(   
     endpoint: str,
