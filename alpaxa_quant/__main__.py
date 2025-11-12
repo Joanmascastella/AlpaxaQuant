@@ -8,7 +8,7 @@ This file enables the package to be executed directly with:
 It displays version information and a concise summary of all available modules.
 """
 
-from . import __version__, describe
+from . import __version__
 
 def main():
     banner = f"""
@@ -36,7 +36,6 @@ Usage Examples:
 if __name__ == "__main__":
     import sys
 
-    # Optional: simple CLI flag for version
     if len(sys.argv) > 1 and sys.argv[1] in ("-v", "--version"):
         print(f"AlpaxaQuant {__version__}")
     else:
