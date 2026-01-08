@@ -1560,7 +1560,7 @@ def get_ten_year_constant_maturity_minus_three_month_treasury_constant(api_key: 
     return df
 # -------------------
 
-if __name__ == "__main__":
-    K= return_FRED_test_api_key()
-    u= return_FRED_base_api_endpoint()
-    get_annual_federal_funds_effective(api_key=K, base_url=u, start_date="2020-01-01", end_date="2021-01-01", verbose=True)
+# if __name__ == "__main__":
+#     K= return_FRED_test_api_key()
+#     u= return_FRED_base_api_endpoint()
+#     get_annual_federal_funds_effective(api_key=K, base_url=u, start_date="2020-01-01", end_date="2021-01-01", verbose=True)
